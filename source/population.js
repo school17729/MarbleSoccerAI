@@ -168,6 +168,8 @@ class Population {
             neuralNetworkTeamPlayers.push(teamPlayers);
         }
 
+        console.log("neuralNetworkTeamPlayers: ", neuralNetworkTeamPlayers);
+
         for (let i = 0; i < separatedTeams.length; i++) {
             let team1 = separatedTeams[i][0];
             let team2 = separatedTeams[i][1];

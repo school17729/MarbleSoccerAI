@@ -166,9 +166,15 @@ class Matrix {
 
     map(func) {
         assertObject(func, Function);
+
+        let newMatrix = new Matrix(this.rowCount, this.columnCount);
+        let newMatrixArray = [];
         for (let i = 0; i < this.matrix.length; i++) {
-            this.matrix[i] = func(this.matrix[i]);
+            newMatrixArray.push(func(this.matrix[i]));
         }
+        newMatrix.setMatrixArray(newMatrixArray);
+
+        return newMatrix;
     }
 
     clone() {

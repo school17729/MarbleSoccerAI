@@ -1,23 +1,23 @@
 class NeuralNetwork {
-    constructor(inputCount, hiddenCount, outputCount, startingFitness) {
-        assert(inputCount, "number");
-        assert(hiddenCount, "number");
-        assert(outputCount, "number");
+    constructor(layerCountArray, startingFitness) {
+        assertObject(layerCountArray, Array);
         assert(startingFitness, "number");
 
-        this.inputCount = inputCount;
-        this.hiddenCount = hiddenCount;
-        this.outputCount = outputCount;
+        this.layerCountArray = layerCountArray;
 
-        this.weightsInputHidden = new Matrix(this.hiddenCount, this.inputCount);
-        this.weightsHiddenOutput = new Matrix(this.outputCount, this.hiddenCount);
-        this.weightsInputHidden.setRandomMatrix();
-        this.weightsHiddenOutput.setRandomMatrix();
+        this.layerWeights = [];
+        for (let i = 1; i < this.layerCountArray.length; i++) {
+            let matrix = new Matrix(this.layerCountArray[i], this.layerCountArray[i - 1]);
+            matrix.setRandomMatrix();
+            this.layerWeights.push(matrix);
+        }
 
-        this.hiddenBias = new Matrix(this.hiddenCount, 1);
-        this.outputBias = new Matrix(this.outputCount, 1);
-        this.hiddenBias.setRandomMatrix();
-        this.outputBias.setRandomMatrix();
+        this.layerBiases = [];
+        for (let i = 1; i < this.layerCountArray.length; i++) {
+            let matrix = new Matrix(this.layerCountArray[i], 1);
+            matrix.setRandomMatrix();
+            this.layerBiases.push(matrix);
+        }
 
         this.fitness = startingFitness;
     }
@@ -25,26 +25,33 @@ class NeuralNetwork {
     feedforward(inputArray) {
         assertObject(inputArray, Array);
 
-        let inputs = new Matrix(this.inputCount, 1);
+        let inputs = new Matrix(this.layerCountArray[0], 1);
         inputs.setMatrixArray(inputArray);
 
-        let hidden = this.weightsInputHidden.multiplyMatrix(inputs);
-        hidden.addMatrix(this.hiddenBias);
-        hidden.map(sigmoid);
+        for (let i = 0; i < this.layerWeights.length; i++) {
+            let newInputs = this.layerWeights[i].multiplyMatrix(inputs);
+            newInputs = newInputs.addMatrix(this.layerBiases[i]);
+            newInputs = newInputs.map(sigmoid);
+            inputs = newInputs;
+        }
 
-        let output = this.weightsHiddenOutput.multiplyMatrix(hidden);
-        output.addMatrix(this.outputBias);
-        output.map(sigmoid);
-
-        return output.getMatrixArray();
+        return inputs.getMatrixArray();
     }
 
     clone() {
-        let newNeuralNetwork = new NeuralNetwork(this.inputCount, this.hiddenCount, this.outputCount, gamesBeforeSelection * 2);
-        newNeuralNetwork.weightsInputHidden = this.weightsInputHidden.clone();
-        newNeuralNetwork.weightsHiddenOutput = this.weightsHiddenOutput.clone();
-        newNeuralNetwork.hiddenBias = this.hiddenBias.clone();
-        newNeuralNetwork.outputBias = this.outputBias.clone();
+        let newNeuralNetwork = new NeuralNetwork(this.layerCountArray, startingFitness);
+
+        let newLayerWeights = [];
+        for (let i = 0; i < this.layerWeights.length; i++) {
+            newLayerWeights.push(this.layerWeights[i].clone());
+        }
+        newNeuralNetwork.layerWeights = newLayerWeights;
+
+        let newLayerBiases = [];
+        for (let i = 0; i < this.layerBiases.length; i++) {
+            newLayerBiases.push(this.layerBiases[i].clone());
+        }
+        newNeuralNetwork.layerBiases = newLayerBiases;
         newNeuralNetwork.fitness = this.fitness;
 
         return newNeuralNetwork;
@@ -59,10 +66,12 @@ class NeuralNetwork {
             }
         }
 
-        this.weightsInputHidden.map(mutateValue);
-        this.weightsHiddenOutput.map(mutateValue);
-        this.hiddenBias.map(mutateValue);
-        this.outputBias.map(mutateValue)
-    }
+        for (let i = 0; i < this.layerWeights.length; i++) {
+            this.layerWeights[i] = this.layerWeights[i].map(mutateValue);
+        }
 
+        for (let i = 0; i < this.layerBiases.length; i++) {
+            this.layerBiases[i] = this.layerBiases[i].map(mutateValue);
+        }
+    }
 }

@@ -9,8 +9,6 @@ let countryImageCorrections = [0, 1.3, 1.4]; //TODO: Complete image corrections
 let flagImages = [null];
 
 let population = null;
-let players = [];
-let balls = [];
 
 let fieldBoundaryLines = [];
 let team1GoalLine = null;
@@ -39,6 +37,9 @@ let ballCoefficientOfRestitution = 1;
 let generation = 1;
 let totalGamesPlayed = 0;
 let mutationRate = 0.1;
+let regularNetworks = false;
+let startingFitness = 1;
+// regular networks are simplified networks that could train faster but have less potential
 
 /**
  * team map:
